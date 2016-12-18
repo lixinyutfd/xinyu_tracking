@@ -17,6 +17,7 @@
 #include <object_manipulation_properties/objectManipulationQuery.h>
 #include <std_msgs/Bool.h>
 #include <tf/transform_listener.h>
+#include <std_msgs/Int32.h>
 #include<generic_gripper_services/genericGripperInterface.h>
 class ObjectGrabber {
 private:
@@ -69,6 +70,7 @@ private:
     Eigen::Affine3d a_gripper_frame_wrt_flange;
 
     ros::Publisher gripper_publisher_;
+    ros::Publisher state_publisher_;
  //want these functions:
     //int32 MOVE_TO_WAITING_POSE = 1 #move to a pose, defined on param server, that is convenient
                                //#e.g., prepared to approach a surface, but out of way of sensors
@@ -106,6 +108,7 @@ private:
     int grab_object(int object_id,geometry_msgs::PoseStamped object_pose_stamped);   
     int dropoff_object(int object_id,geometry_msgs::PoseStamped desired_object_pose_stamped);
     
+    std_msgs::Int32 task_number_;
     //void vertical_cylinder_power_grasp(geometry_msgs::PoseStamped object_pose);    
     //void grasp_from_approach_pose(geometry_msgs::PoseStamped approach_pose, double approach_dist);
 
@@ -117,6 +120,7 @@ public:
     ~ObjectGrabber(void) {
     }
     //define some member methods here
+    void pub();
 
 };
 

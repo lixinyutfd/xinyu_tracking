@@ -18,6 +18,7 @@ geometry_msgs::PoseStamped g_object_pickup_poseStamped;
 geometry_msgs::PoseStamped g_object_dropoff_poseStamped;
 int g_object_ID;
 bool g_received_order=false;
+ros::Publisher state_pub;
 
 class PartFetcherActionServer {
 private:
@@ -182,6 +183,7 @@ int main(int argc, char** argv) {
 
     PartFetcherActionServer as_object; 
     ROS_INFO("going into spin");
+    
 
     while (ros::ok()) {
         ros::spinOnce(); 

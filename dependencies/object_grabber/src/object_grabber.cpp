@@ -22,7 +22,7 @@ object_grabber_as_(nh_, "object_grabber_action_service", boost::bind(&ObjectGrab
         exit(0);
   
     }
-
+    state_publisher_ = nh_.advertise<std_msgs::Int32>("task_state", 1, true);
 
     manip_properties_client_ = nh_.serviceClient<object_manipulation_properties::objectManipulationQuery>("object_manip_query_svc");
     //attempt to connect to the service:
@@ -442,6 +442,7 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
         
     //send command to execute planned motion
     ROS_INFO("executing plan: ");
+    task_number_.data = 2;
     rtn_val=arm_motion_commander_.execute_planned_path();
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
     //ros::Duration(2.0).sleep();
@@ -451,6 +452,7 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
     rtn_val=arm_motion_commander_.plan_path_current_to_goal_gripper_pose(grasp_pose_);
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
     ROS_INFO("executing plan: ");
+    task_number_.data = 3;
     rtn_val=arm_motion_commander_.execute_planned_path();   
     ROS_WARN("poised to grasp object; invoke gripper grasp action here ...");
 
@@ -466,6 +468,7 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
     rtn_val=arm_motion_commander_.plan_path_current_to_goal_gripper_pose(depart_pose_);
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
     ROS_INFO("performing motion");
+    task_number_.data = 4;
     rtn_val=arm_motion_commander_.execute_planned_path();
  
     
@@ -551,6 +554,7 @@ void ObjectGrabber::executeCB(const actionlib::SimpleActionServer<object_grabber
             ROS_INFO("planning move to waiting pose");
             rtn_val = arm_motion_commander_.plan_move_to_waiting_pose(); //this should always be successful
             ROS_INFO("commanding plan execution");
+            task_number_.data = 1;
             rtn_val = arm_motion_commander_.execute_planned_path();
             grab_result_.return_code = rtn_val;
             object_grabber_as_.setSucceeded(grab_result_);
@@ -595,4 +599,8 @@ void ObjectGrabber::executeCB(const actionlib::SimpleActionServer<object_grabber
             grab_result_.return_code = object_grabber::object_grabberResult::ACTION_CODE_UNKNOWN;
             object_grabber_as_.setAborted(grab_result_);
     }
+}
+
+void ObjectGrabber::pub(){
+    state_publisher_.publish(task_number_);
 }

@@ -22,6 +22,7 @@
 #include<std_msgs/Float32.h>
 #include<std_msgs/Float64.h>
 #include<std_msgs/UInt8.h>
+#include<std_msgs/Int32.h>
 #include<geometry_msgs/PoseStamped.h>
 #include<std_msgs/Bool.h>
 #include<sensor_msgs/JointState.h>
@@ -40,6 +41,7 @@ const double ARM_ERR_TOL = 0.1; // tolerance btwn last joint commands and curren
 
 const double dt_traj = 0.02; // time step for trajectory interpolation
 int n = 0;
+ros::Subscriber state_subscriber;
 
 bool g_js_doneCb_flag = true;
 void set_ur_jnt_names() {
@@ -871,12 +873,19 @@ bool ArmMotionInterface::plan_path_current_to_goal_dp_xyz() {
     return path_is_valid_;
 }
 
+void stateCb(const std_msgs::Int32& state_number){
+    std_msgs::Int32 stateNum;
+    stateNum.data = state_number.data;
+    ROS_INFO("robot state is:%d", stateNum.data);
+    //return stateNum;
+}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ur10_cart_move_as");
     ros::NodeHandle nh; //standard ros node handle 
     traj_pub = nh.advertise<trajectory_msgs::JointTrajectory>("/ariac/arm/command", 1);
-  
+    state_subscriber = nh.subscribe("task_state", 1, stateCb);
+
     set_ur_jnt_names();
     ros::Subscriber joint_state_sub = nh.subscribe("/ariac/joint_states", 1, jointStatesCb);
     g_q_vec_arm_Xd.resize(VECTOR_DIM);
