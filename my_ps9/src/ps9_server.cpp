@@ -105,6 +105,7 @@ int grabbing(){
 
     bool finished_before_timeout;
     //move to waiting pose
+    ///*
     ROS_INFO("sending command to move to waiting pose");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE;
     object_grabber_ac.sendGoal(object_grabber_goal, &objectGrabberDoneCb);
@@ -113,11 +114,11 @@ int grabbing(){
         ROS_WARN("giving up waiting on result ");
         return 1;
     }
-
+    //*/
     //ROS_INFO("Is waiting pose finished?");
     //ros::Duration(2.0).sleep();
     
-    ROS_INFO("sending a grab-object command");
+    ///*ROS_INFO("sending a grab-object command");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::GRAB_OBJECT; //specify the action to be performed 
     object_grabber_goal.object_id = ObjectIdCodes::TOY_BLOCK_ID; // specify the object to manipulate                
     object_grabber_goal.object_frame = object_pickup_poseStamped; //and the object's current pose
@@ -132,9 +133,12 @@ int grabbing(){
         ROS_WARN("giving up waiting on result ");
         return 1;
     }
-    
+    //*/
     //ros::Duration(2.0).sleep();
     //move to waiting pose/
+    //Add second waiting pose is very bad; So we might be able to skip this step 
+    //and command the robot directly go to drop off pose;
+    ///*
     ROS_INFO("sending command to move to waiting pose");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE;
     object_grabber_ac.sendGoal(object_grabber_goal, &objectGrabberDoneCb);
@@ -143,7 +147,7 @@ int grabbing(){
         ROS_WARN("giving up waiting on result ");
         return 1;
     }
-    
+    //*/
     //could instead hand-tune some intermediate, joint-space poses:
     //    Eigen::VectorXd joint_angles;
     // resize to 6 joints and populate w/ magic numbers
@@ -151,6 +155,7 @@ int grabbing(){
     //rtn_val=arm_motion_commander.execute_planned_path(); 
    
     //ros::Duration(2.0).sleep();
+    /*
     ROS_INFO("sending a dropoff-object command");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::DROPOFF_OBJECT; //specify the action to be performed 
     object_grabber_goal.object_id = ObjectIdCodes::TOY_BLOCK_ID; // specify the object to manipulate                
@@ -166,6 +171,7 @@ int grabbing(){
         ROS_WARN("giving up waiting on result ");
         return 1;
     }
+    //*/
     return 0;
 }
 

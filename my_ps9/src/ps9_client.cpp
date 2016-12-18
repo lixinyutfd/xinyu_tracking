@@ -32,10 +32,11 @@ void set_pulley_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     //hard code an object pose; later, this will come from perception
     //specify reference frame in which this pose is expressed:
     //will require that "system_ref_frame" is known to tf
-    object_poseStamped.header.frame_id = "system_ref_frame"; //set object pose; ref frame must be connected via tf
-    object_poseStamped.pose.position.x = -0.5;
-    object_poseStamped.pose.position.y = -0.7;
-    object_poseStamped.pose.position.z = 0.8;//0.5622; //-0.125; //pose w/rt world frame
+    //object_poseStamped.header.frame_id = "system_ref_frame"; //set object pose; ref frame must be connected via tf
+    object_poseStamped.header.frame_id = "base_link";
+    object_poseStamped.pose.position.x = 0.9;//-0.5;
+    object_poseStamped.pose.position.y = 0;
+    object_poseStamped.pose.position.z = 0.3;//0.5622; //-0.125; //pose w/rt world frame
     object_poseStamped.pose.orientation.x = 0;
     object_poseStamped.pose.orientation.y = 0;
     object_poseStamped.pose.orientation.z = 0.0;
@@ -45,7 +46,7 @@ void set_pulley_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     object_dropoff_poseStamped = object_poseStamped; //specify desired drop-off pose of object
     object_dropoff_poseStamped.pose.position.x = 1;
     object_dropoff_poseStamped.pose.position.y = 0;
-    object_dropoff_poseStamped.pose.position.z = 0.793; 
+    object_dropoff_poseStamped.pose.position.z = 0.9;//0.793; 
 }
 
 void set_gasket_object_frames(geometry_msgs::PoseStamped &object_poseStamped,

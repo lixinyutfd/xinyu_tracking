@@ -39,7 +39,7 @@ const double ARM_ERR_TOL = 0.1; // tolerance btwn last joint commands and curren
 // used to decide if last command is good start point for new path
 
 const double dt_traj = 0.02; // time step for trajectory interpolation
-
+int n = 0;
 
 bool g_js_doneCb_flag = true;
 void set_ur_jnt_names() {
@@ -122,8 +122,10 @@ void stuff_trajectory(std::vector<Eigen::VectorXd> qvecs, trajectory_msgs::Joint
         new_trajectory.points.push_back(trajectory_point1);
     }
     //stuffing 0 to linear joint;
+    ROS_WARN("qvecs size is::%d", qvecs.size());
+    
     for (int i = 0; i < qvecs.size(); i++){
-        new_trajectory.points[i].positions.push_back(0);
+        new_trajectory.points[i].positions.push_back(0.5*i);
     }
   //display trajectory:
     for (int iq = 1; iq < qvecs.size(); iq++) {
@@ -634,6 +636,8 @@ void ArmMotionInterface::compute_flange_stamped_pose(void) {
 }
 
 void ArmMotionInterface::execute_planned_move(void) {
+    n = n+1;
+    ROS_INFO("n = %d", n);
     if (!path_is_valid_) {
         cart_result_.return_code = cartesian_planner::cart_moveResult::PATH_NOT_VALID;
         ROS_WARN("attempted to execute invalid path!");
