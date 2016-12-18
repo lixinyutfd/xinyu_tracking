@@ -33,7 +33,7 @@ Eigen::VectorXd g_q_vec_arm_Xd;
 vector<int> g_arm_joint_indices;
 vector<string> g_ur_jnt_names;
 ros::Publisher traj_pub;
-const double SPEED_SCALE_FACTOR=1.0; //increase this to slow down motions
+const double SPEED_SCALE_FACTOR=2.0; //increase this to slow down motions
 
 const double ARM_ERR_TOL = 0.1; // tolerance btwn last joint commands and current arm pose
 // used to decide if last command is good start point for new path
@@ -121,6 +121,7 @@ void stuff_trajectory(std::vector<Eigen::VectorXd> qvecs, trajectory_msgs::Joint
         trajectory_point1.time_from_start = ros::Duration(net_time);
         new_trajectory.points.push_back(trajectory_point1);
     }
+    //stuffing 0 to linear joint;
     for (int i = 0; i < qvecs.size(); i++){
         new_trajectory.points[i].positions.push_back(0);
     }
@@ -650,16 +651,20 @@ void ArmMotionInterface::execute_planned_move(void) {
     busy_working_on_a_request_ = true;
     g_js_doneCb_flag = false;
     //ROS_INFO("here?");
-    cout<<"time from start time: "<<endl;
-    cout<<des_trajectory_.points[1].time_from_start.toSec()<<endl;
+    
     //arm_action_client.sendGoal(goal, &armDoneCb);
     //action_client_.sendGoal(js_goal_, boost::bind(&ArmMotionInterface::armDoneCb_, this, _1, _2)); // we could also name additional callback functions here, if desired
     //stuffing everything to be zero;
-    int n = des_trajectory_.points.size();
+    //int n = des_trajectory_.points.size();
     //for (int i = 0; i<n; i++){
     //    des_trajectory_.points[i].positions[6] = 0;
     //}
     traj_pub.publish(des_trajectory_);
+    ROS_INFO("waiting until trajectroy execute done!!!!!!!");
+    cout<<"time from start time: "<<endl;
+    cout<<des_trajectory_.points[1].time_from_start.toSec()<<endl;
+    ros::Duration(des_trajectory_.points[1].time_from_start).sleep();
+
     //ROS_INFO("des_trajectory_time=%f", des_trajectory_.points[5].time_from_start);
     
     /*ROS_INFO("waiting on trajectory streamer...");

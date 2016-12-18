@@ -114,8 +114,9 @@ int grabbing(){
         return 1;
     }
 
-
-
+    //ROS_INFO("Is waiting pose finished?");
+    //ros::Duration(2.0).sleep();
+    
     ROS_INFO("sending a grab-object command");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::GRAB_OBJECT; //specify the action to be performed 
     object_grabber_goal.object_id = ObjectIdCodes::TOY_BLOCK_ID; // specify the object to manipulate                
@@ -131,8 +132,9 @@ int grabbing(){
         ROS_WARN("giving up waiting on result ");
         return 1;
     }
- 
-    //move to waiting pose
+    
+    //ros::Duration(2.0).sleep();
+    //move to waiting pose/
     ROS_INFO("sending command to move to waiting pose");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE;
     object_grabber_ac.sendGoal(object_grabber_goal, &objectGrabberDoneCb);
@@ -148,6 +150,7 @@ int grabbing(){
     //rtn_val=arm_motion_commander.plan_jspace_path_current_to_qgoal(joint_angles);
     //rtn_val=arm_motion_commander.execute_planned_path(); 
    
+    //ros::Duration(2.0).sleep();
     ROS_INFO("sending a dropoff-object command");
     object_grabber_goal.action_code = object_grabber::object_grabberGoal::DROPOFF_OBJECT; //specify the action to be performed 
     object_grabber_goal.object_id = ObjectIdCodes::TOY_BLOCK_ID; // specify the object to manipulate                
@@ -180,7 +183,7 @@ int main(int argc, char** argv) {
         if (g_received_order) {
          ROS_WARN("main: received new order; should act on it!");
          if(grabbing() == 0){
-            ROS_INFO("successfully grabbed");
+            ROS_INFO("grabbing function finished");
          }
          g_received_order=false;
         }

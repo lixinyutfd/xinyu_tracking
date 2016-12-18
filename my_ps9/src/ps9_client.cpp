@@ -33,9 +33,9 @@ void set_pulley_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     //specify reference frame in which this pose is expressed:
     //will require that "system_ref_frame" is known to tf
     object_poseStamped.header.frame_id = "system_ref_frame"; //set object pose; ref frame must be connected via tf
-    object_poseStamped.pose.position.x = 0.15;
+    object_poseStamped.pose.position.x = -0.5;
     object_poseStamped.pose.position.y = -0.7;
-    object_poseStamped.pose.position.z = 0.5622; //-0.125; //pose w/rt world frame
+    object_poseStamped.pose.position.z = 0.8;//0.5622; //-0.125; //pose w/rt world frame
     object_poseStamped.pose.orientation.x = 0;
     object_poseStamped.pose.orientation.y = 0;
     object_poseStamped.pose.orientation.z = 0.0;
@@ -45,7 +45,7 @@ void set_pulley_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     object_dropoff_poseStamped = object_poseStamped; //specify desired drop-off pose of object
     object_dropoff_poseStamped.pose.position.x = 1;
     object_dropoff_poseStamped.pose.position.y = 0;
-    object_dropoff_poseStamped.pose.position.z = 0.90; 
+    object_dropoff_poseStamped.pose.position.z = 0.793; 
 }
 
 void set_gasket_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
@@ -64,8 +64,8 @@ void set_gasket_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     */
     object_poseStamped.header.frame_id = "system_ref_frame"; //set object pose; ref frame must be connected via tf
     object_poseStamped.pose.position.x = 0.0;
-    object_poseStamped.pose.position.y = 1.2;
-    object_poseStamped.pose.position.z = 1.0; //-0.125; //pose w/rt world frame
+    object_poseStamped.pose.position.y = 0.85;
+    object_poseStamped.pose.position.z = 0.54; //-0.125; //pose w/rt world frame
     object_poseStamped.pose.orientation.x = 0;
     object_poseStamped.pose.orientation.y = 0;
     object_poseStamped.pose.orientation.z = 0.0;
@@ -74,9 +74,9 @@ void set_gasket_object_frames(geometry_msgs::PoseStamped &object_poseStamped,
     object_poseStamped.header.stamp = ros::Time::now();
 
     object_dropoff_poseStamped = object_poseStamped; //specify desired drop-off pose of object
-    object_dropoff_poseStamped.pose.position.x = 0.0;
-    object_dropoff_poseStamped.pose.position.y = 1.2;
-    object_dropoff_poseStamped.pose.position.z = 2.1; 
+    object_dropoff_poseStamped.pose.position.x = 1.0;
+    object_dropoff_poseStamped.pose.position.y = 0.0;
+    object_dropoff_poseStamped.pose.position.z = 0.9; 
 }
 
 void doneCb(const actionlib::SimpleClientGoalState& state,
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     geometry_msgs::PoseStamped object_pickup_poseStamped;
     geometry_msgs::PoseStamped object_dropoff_poseStamped;
     //specify object pick-up and drop-off frames 
-    set_gasket_object_frames(object_pickup_poseStamped, object_dropoff_poseStamped);
+    set_pulley_object_frames(object_pickup_poseStamped, object_dropoff_poseStamped);
     
     actionlib::SimpleActionClient<my_ps9::ps9Action> action_client("ps9_fetcher", true);
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     ROS_INFO("connected to action server"); // if here, then we connected to the server;
 
         // stuff a goal message:
-        goal.object_id = ObjectIdCodes::ARIAC_GASKET; 
+        goal.object_id = ObjectIdCodes::ARIAC_PULLEY; 
         goal.object_frame = object_pickup_poseStamped;
         goal.desired_frame =  object_dropoff_poseStamped;       
        
