@@ -41,7 +41,12 @@ const double ARM_ERR_TOL = 0.1; // tolerance btwn last joint commands and curren
 
 const double dt_traj = 0.02; // time step for trajectory interpolation
 int n = 0;
+std_msgs::Int32 stateNum;
+float point1;
+float point2;
+
 ros::Subscriber state_subscriber;
+ros::Subscriber client_subscriber;
 
 bool g_js_doneCb_flag = true;
 void set_ur_jnt_names() {
@@ -124,13 +129,23 @@ void stuff_trajectory(std::vector<Eigen::VectorXd> qvecs, trajectory_msgs::Joint
         new_trajectory.points.push_back(trajectory_point1);
     }
     //stuffing 0 to linear joint;
-    ROS_WARN("qvecs size is::%d", qvecs.size());
-    
-    for (int i = 0; i < qvecs.size(); i++){
-        new_trajectory.points[i].positions.push_back(0.5*i);
+    //ROS_WARN("qvecs size is::%d", qvecs.size());
+    float ds1 = point1/qvecs.size();
+    if (stateNum.data == 1) {
+        for (int i = 0; i < qvecs.size(); i++){
+            new_trajectory.points[i].positions.push_back((float)i*ds1);
+        }
+        //point2 = point1;
+    }
+    float ds2 = (point2- point1)/qvecs.size();
+    if (stateNum.data == 2){
+        for (int i = 0; i < qvecs.size(); i++){
+
+            new_trajectory.points[i].positions.push_back(point1 + (float)i*ds2);
+        }
     }
   //display trajectory:
-    for (int iq = 1; iq < qvecs.size(); iq++) {
+    for (int iq = 2; iq < qvecs.size(); iq++) {
         cout<<"traj pt: ";
                 for (int j=0;j<VECTOR_DIM;j++) {
                     cout<<new_trajectory.points[iq].positions[j]<<", ";
@@ -874,10 +889,18 @@ bool ArmMotionInterface::plan_path_current_to_goal_dp_xyz() {
 }
 
 void stateCb(const std_msgs::Int32& state_number){
-    std_msgs::Int32 stateNum;
+    //std_msgs::Int32 stateNum;
     stateNum.data = state_number.data;
-    ROS_INFO("robot state is:%d", stateNum.data);
+    //ROS_INFO("robot state is:%d", stateNum.data);
     //return stateNum;
+}
+
+void clientCb(const trajectory_msgs::JointTrajectory& info){
+    //float point1;
+    //trajectory_msgs::JointTrajectory point1;
+    point1 = info.points[0].positions[0];
+    point2 = info.points[0].positions[1];
+    
 }
 
 int main(int argc, char** argv) {
@@ -885,6 +908,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh; //standard ros node handle 
     traj_pub = nh.advertise<trajectory_msgs::JointTrajectory>("/ariac/arm/command", 1);
     state_subscriber = nh.subscribe("task_state", 1, stateCb);
+    client_subscriber = nh.subscribe("user_info", 1, clientCb);
 
     set_ur_jnt_names();
     ros::Subscriber joint_state_sub = nh.subscribe("/ariac/joint_states", 1, jointStatesCb);

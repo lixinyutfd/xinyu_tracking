@@ -31,6 +31,7 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 
 # Executables: uncomment the following and edit arguments to compile new nodes
 # may add more of these lines for more nodes from the same package
+ cs_add_executable(ps9_client2 src/ps9_client2.cpp)
  cs_add_executable(ps9_client src/ps9_client.cpp)
  cs_add_executable(ps9_server src/ps9_server.cpp)
  
