@@ -9,7 +9,10 @@
 // Make sure there is a tf publisher for these for any robot that is launched
 
 #include <object_grabber/object_grabber.h>
+
 using namespace std; 
+
+
 
 ObjectGrabber::ObjectGrabber(ros::NodeHandle* nodehandle) : nh_(*nodehandle),
 object_grabber_as_(nh_, "object_grabber_action_service", boost::bind(&ObjectGrabber::executeCB, this, _1), false)
@@ -22,7 +25,39 @@ object_grabber_as_(nh_, "object_grabber_action_service", boost::bind(&ObjectGrab
         exit(0);
   
     }
+
+    //leep_command.positions.clear();
+/*
+    sleep_command.points.clear(); // can clear components, but not entire trajectory_msgs
+    sleep_command.joint_names.clear();
+    //sleep_command.header.stamp = ros::Time::now();
+    sleep_command.joint_names.push_back("shoulder_pan_joint");
+    sleep_command.joint_names.push_back("shoulder_lift_joint");
+    sleep_command.joint_names.push_back("elbow_joint");
+    sleep_command.joint_names.push_back("wrist_1_joint");
+    sleep_command.joint_names.push_back("wrist_2_joint");
+    sleep_command.joint_names.push_back("wrist_3_joint");
+    sleep_command.joint_names.push_back("linear_arm_actuator_joint");
+
+    //['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'linear_arm_actuator_joint'];
+
+    sleep_command.points.resize(1);
+    sleep_command.points[0].velocities.resize(7, 0.0);
+    /*sleep_command.points[0].velocities.clear();
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0);
+    sleep_command.points[0].velocities.push_back(0.2);
+    for (int i = 0; i < 7; ++i) {
+        sleep_command.points[0].velocities[i] = 0.0;
+    }
+    sleep_command.points[0].time_from_start = ros::Duration(2.0);*/
+//end
     state_publisher_ = nh_.advertise<std_msgs::Int32>("task_state", 1, true);
+    sleep_publisher_ = nh_.advertise<trajectory_msgs::JointTrajectory>("/ariac/arm/command", 1);
 
     manip_properties_client_ = nh_.serviceClient<object_manipulation_properties::objectManipulationQuery>("object_manip_query_svc");
     //attempt to connect to the service:
@@ -437,6 +472,7 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
     ROS_WARN("object-grabber as planning joint-space move to approach pose");
     //xformUtils.printPose(approach_pose_);
 
+    task_number_.data = 2;
     rtn_val=arm_motion_commander_.plan_jspace_path_current_to_cart_gripper_pose(approach_pose_);
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
         
@@ -445,10 +481,55 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
     task_number_.data = 2;
     rtn_val=arm_motion_commander_.execute_planned_path();
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
-    //ros::Duration(2.0).sleep();
+    //ros::Duration(20.0).sleep();
+    //sleep command here;
+    for (int j = 0; j<100; j++){    
+        sleep_command.points.clear(); // can clear components, but not entire trajectory_msgs
+        sleep_command.joint_names.clear();
+        //sleep_command.header.stamp = ros::Time::now();
+        sleep_command.joint_names.push_back("shoulder_pan_joint");
+        sleep_command.joint_names.push_back("shoulder_lift_joint");
+        sleep_command.joint_names.push_back("elbow_joint");
+        sleep_command.joint_names.push_back("wrist_1_joint");
+        sleep_command.joint_names.push_back("wrist_2_joint");
+        sleep_command.joint_names.push_back("wrist_3_joint");
+        sleep_command.joint_names.push_back("linear_arm_actuator_joint");
+
+        //['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'linear_arm_actuator_joint'];
+
+        sleep_command.points.resize(1);
+        sleep_command.points[0].positions.resize(7, 0.0);
+        /*sleep_command.points[0].velocities.clear();
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0);
+        sleep_command.points[0].velocities.push_back(0.2);*/
+        /*for (int i = 0; i < 7; ++i) {
+            sleep_command.points[0].positions[i] = 0.0;
+        }*/
+        sleep_command.points[0].positions[0] = -0.18416767097845455;
+        sleep_command.points[0].positions[1] = -0.790535070263811;
+        sleep_command.points[0].positions[2] = 0.8598446917991698;
+        sleep_command.points[0].positions[3] = 1.5051348740130686;
+        sleep_command.points[0].positions[4] = 1.568396508235479;
+        sleep_command.points[0].positions[5] = 0.9190327994840342;
+        //sleep_command.points[0].positions[6] += (-0.01)*j;
+        sleep_command.points[0].positions[6] = -0.0009221205800622+(-0.01)*j;
+        //leep_command.points[0].positions.push_back(0.01);
+        sleep_command.points[0].time_from_start = ros::Duration(0.05);
+        sleep_command.header.stamp = ros::Time::now()+ros::Duration(0.05);
+        sleep_publisher_.publish(sleep_command);
+        ros::Duration(0.05).sleep();
+    }
+    //ros::Duration(0.1).sleep();
     
     ROS_INFO("planning motion of gripper to grasp pose at: ");
     xformUtils.printPose(grasp_pose_);
+    task_number_.data = 3;
+
     rtn_val=arm_motion_commander_.plan_path_current_to_goal_gripper_pose(grasp_pose_);
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
     ROS_INFO("executing plan: ");
@@ -465,6 +546,7 @@ int  ObjectGrabber::grab_object(int object_id,geometry_msgs::PoseStamped object_
  
     ROS_INFO("planning motion of gripper to depart pose at: ");
     xformUtils.printPose(depart_pose_);
+    task_number_.data = 4;
     rtn_val=arm_motion_commander_.plan_path_current_to_goal_gripper_pose(depart_pose_);
     if (rtn_val != cartesian_planner::cart_moveResult::SUCCESS) return rtn_val; //return error code
     ROS_INFO("performing motion");
@@ -552,6 +634,7 @@ void ObjectGrabber::executeCB(const actionlib::SimpleActionServer<object_grabber
             //need ability to get hand out of way of camera
         case object_grabber::object_grabberGoal::MOVE_TO_WAITING_POSE:
             ROS_INFO("planning move to waiting pose");
+            task_number_.data = 1;
             rtn_val = arm_motion_commander_.plan_move_to_waiting_pose(); //this should always be successful
             ROS_INFO("commanding plan execution");
             task_number_.data = 1;

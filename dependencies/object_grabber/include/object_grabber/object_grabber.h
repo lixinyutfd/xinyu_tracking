@@ -18,6 +18,7 @@
 #include <std_msgs/Bool.h>
 #include <tf/transform_listener.h>
 #include <std_msgs/Int32.h>
+#include <trajectory_msgs/JointTrajectory.h>
 #include<generic_gripper_services/genericGripperInterface.h>
 class ObjectGrabber {
 private:
@@ -68,9 +69,11 @@ private:
     Eigen::Affine3d a_gripper_start_,a_gripper_end_;
     Eigen::Affine3d a_gripper_approach_,a_gripper_depart_, a_gripper_grasp_;
     Eigen::Affine3d a_gripper_frame_wrt_flange;
+    trajectory_msgs::JointTrajectory sleep_command;
 
     ros::Publisher gripper_publisher_;
     ros::Publisher state_publisher_;
+    ros::Publisher sleep_publisher_;
  //want these functions:
     //int32 MOVE_TO_WAITING_POSE = 1 #move to a pose, defined on param server, that is convenient
                                //#e.g., prepared to approach a surface, but out of way of sensors

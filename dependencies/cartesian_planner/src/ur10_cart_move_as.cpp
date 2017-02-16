@@ -130,22 +130,36 @@ void stuff_trajectory(std::vector<Eigen::VectorXd> qvecs, trajectory_msgs::Joint
     }
     //stuffing 0 to linear joint;
     //ROS_WARN("qvecs size is::%d", qvecs.size());
+    point1 = -0.5+1;
+    point2 = -1.0+1;
     float ds1 = point1/qvecs.size();
+    float ds2 = (point2- point1)/qvecs.size();
     if (stateNum.data == 1) {
         for (int i = 0; i < qvecs.size(); i++){
-            new_trajectory.points[i].positions.push_back((float)i*ds1);
+            new_trajectory.points[i].positions.push_back(point2);
         }
         //point2 = point1;
     }
-    float ds2 = (point2- point1)/qvecs.size();
-    if (stateNum.data == 2){
-        for (int i = 0; i < qvecs.size(); i++){
-
-            new_trajectory.points[i].positions.push_back(point1 + (float)i*ds2);
+    else if (stateNum.data == 2){
+            for (int i = 0; i < qvecs.size(); i++){
+                new_trajectory.points[i].positions.push_back(point2);
+                //new_trajectory.points[i].positions.push_back(point2);
+            }
         }
+    else if (stateNum.data == 3) { 
+        for (int i = 0; i < qvecs.size(); i++){
+                new_trajectory.points[i].positions.push_back(point2);
+                //new_trajectory.points[i].positions.push_back(point2-1);
+            }
+    }
+    else { 
+        for (int i = 0; i < qvecs.size(); i++){
+                new_trajectory.points[i].positions.push_back(point1);
+                //new_trajectory.points[i].positions.push_back(point2-1);
+            }
     }
   //display trajectory:
-    for (int iq = 2; iq < qvecs.size(); iq++) {
+    for (int iq = 1; iq < qvecs.size(); iq++) {
         cout<<"traj pt: ";
                 for (int j=0;j<VECTOR_DIM;j++) {
                     cout<<new_trajectory.points[iq].positions[j]<<", ";
@@ -680,11 +694,36 @@ void ArmMotionInterface::execute_planned_move(void) {
     //for (int i = 0; i<n; i++){
     //    des_trajectory_.points[i].positions[6] = 0;
     //}
-    traj_pub.publish(des_trajectory_);
-    ROS_INFO("waiting until trajectroy execute done!!!!!!!");
-    cout<<"time from start time: "<<endl;
-    cout<<des_trajectory_.points[1].time_from_start.toSec()<<endl;
-    ros::Duration(des_trajectory_.points[1].time_from_start).sleep();
+    
+    /*if(stateNum.data ==3 ) {
+        for (int j = 0; j<des_trajectory_.points.size();j++){
+            des_trajectory_.points[j].positions[6] -= 1.0;
+        }
+        for (int i = 0; i<10; i++){
+            for (int j = 0; j<des_trajectory_.points.size();j++){
+
+                des_trajectory_.points[j].positions[6] += (-0.1)*j;
+                des_trajectory_.points[j].time_from_start += ros::Duration(0.05);
+                des_trajectory_.header.stamp = ros::Time::now()+ros::Duration(0.05);
+                
+                
+            }*/
+            /*traj_pub.publish(des_trajectory_);
+             ROS_INFO("waiting until trajectroy execute done!!!!!!!");
+        cout<<"time from start time: "<<endl;
+        cout<<des_trajectory_.points[1].time_from_start.toSec()<<endl;
+        ros::Duration(des_trajectory_.points[1].time_from_start).sleep();*/
+            /*ros::Duration(0.2).sleep();
+
+        }
+    }*/
+   // else{
+        traj_pub.publish(des_trajectory_);
+        ROS_INFO("waiting until trajectroy execute done!!!!!!!");
+        cout<<"time from start time: "<<endl;
+        cout<<des_trajectory_.points[1].time_from_start.toSec()<<endl;
+        ros::Duration(des_trajectory_.points[1].time_from_start).sleep();
+    //}
 
     //ROS_INFO("des_trajectory_time=%f", des_trajectory_.points[5].time_from_start);
     
@@ -891,7 +930,7 @@ bool ArmMotionInterface::plan_path_current_to_goal_dp_xyz() {
 void stateCb(const std_msgs::Int32& state_number){
     //std_msgs::Int32 stateNum;
     stateNum.data = state_number.data;
-    //ROS_INFO("robot state is:%d", stateNum.data);
+    ROS_INFO("robot state is:%d", stateNum.data);
     //return stateNum;
 }
 
