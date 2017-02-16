@@ -1,3 +1,5 @@
+//Xinyu Feb, 2017
+//Robot ik module header file 
 #ifndef ROBOT_IK_H
 #define ROBOT_IK_H
 
